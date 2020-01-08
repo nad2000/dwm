@@ -67,9 +67,11 @@ static const char *dmenucmd[] = {
     "dmenu_run", "-m",      dmenumon, "-fn",    dmenufont, "-nb",     col_gray1,
     "-nf",       col_gray3, "-sb",    col_cyan, "-sf",     col_gray4, NULL};
 static const char *termcmd[] = {"st", NULL};
+static const char *slockcmd[] = {"slock", NULL};
 
 static Key keys[] = {
     /* modifier                     key        function        argument */
+    {MODKEY | ShiftMask, XK_l, spawn, {.v = slockcmd}},
     {MODKEY, XK_p, spawn, {.v = dmenucmd}},
     {MODKEY | ShiftMask, XK_Return, spawn, {.v = termcmd}},
     {MODKEY, XK_b, togglebar, {0}},
