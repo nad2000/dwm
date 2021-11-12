@@ -3,3 +3,6 @@
 *.o
 dwm
 dwm.pdf
+.session.vim
+tags
+
