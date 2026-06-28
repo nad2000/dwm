@@ -3,8 +3,20 @@
 /* appearance */
 static const unsigned int borderpx = 0;  // 1 /* border pixel of windows */
 static const unsigned int snap = 32;    /* snap pixel */
-static const int showbar = 1;           /* 0 means no bar */
-static const int topbar = 1;            /* 0 means bottom bar */
+static const int showbar        = 1; /* MUST be 1 so dwm allocates space for Polybar */
+static const int showsystray   = 0; /* Set to 0 to completely release X11 lock */
+// static const int showbar = 0;           /* 0 means no bar */
+// static const int showsystray = 0; /* 0 means no native dwm tray */
+static const int topbar         = 1; /* 1 if Polybar is at the top, 0 if at the bottom */
+// anybar with Polybar support:
+static const int usealtbar     = 1;          /* 1 means use non-dwm status bar */
+// static const char *altbarclass = "Polybar";  /* Alternate bar class name */
+static const char *altbarclass = "Polybar"; /* Helps dwm identify Polybar's window */
+static const char *alttrayname      = "tray";    /* Polybar tray instance name */
+static const char *altbarcmd        = "$HOME/bar.sh"; /* Alternate bar launch command */
+// static const char *altbarcmd        = "$HOME/.config/polybar/bar.sh"; /* Alternate bar launch command */
+// static const char *altbarcmd   = "polybar dwmbar"; /* Optional automated bar launch command */
+
 // #define FONT "Hack"
 #define FONT "Victor Mono Nerd Font"
 // static const char *fonts[] = {"monospace:size=10"};
