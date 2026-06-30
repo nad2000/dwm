@@ -66,7 +66,7 @@ enum { CurNormal, CurResize, CurMove, CurLast }; /* cursor */
 enum { SchemeNorm, SchemeSel }; /* color schemes */
 enum { NetSupported, NetWMName, NetWMState, NetWMCheck,
        NetWMFullscreen, NetActiveWindow, NetWMWindowType,
-       NetWMWindowTypeDialog, NetClientList, NetDesktopNames, NetDesktopViewport, NetNumberOfDesktops, NetCurrentDesktop, NetLast }; /* EWMH atoms */
+       NetWMWindowTypeDialog, NetClientList, NetDesktopNames, NetDesktopViewport, NetNumberOfDesktops, NetCurrentDesktop, NetWMDesktop, NetLast }; /* EWMH atoms */
 enum { WMProtocols, WMDelete, WMState, WMTakeFocus, WMLast }; /* default atoms */
 enum { ClkTagBar, ClkLtSymbol, ClkStatusText, ClkWinTitle,
        ClkClientWin, ClkRootWin, ClkLast }; /* clicks */
@@ -1164,6 +1164,7 @@ manage(Window w, XWindowAttributes *wa)
 	arrange(c->mon);
 	XMapWindow(dpy, c->win);
 	focus(NULL);
+	updateclientlist();
 }
 
 void
@@ -1595,6 +1596,7 @@ sendmon(Client *c, Monitor *m)
 		resizeclient(c, m->mx, m->my, m->mw, m->mh);
 	focus(NULL);
 	arrange(NULL);
+	updateclientlist();
 }
 
 void
@@ -1761,6 +1763,8 @@ setup(void)
 	netatom[NetNumberOfDesktops] = XInternAtom(dpy, "_NET_NUMBER_OF_DESKTOPS", False);
 	netatom[NetCurrentDesktop] = XInternAtom(dpy, "_NET_CURRENT_DESKTOP", False);
 	netatom[NetDesktopNames] = XInternAtom(dpy, "_NET_DESKTOP_NAMES", False);
+	netatom[NetWMDesktop] = XInternAtom(dpy, "_NET_WM_DESKTOP", False);
+
 	/* init cursors */
 	cursor[CurNormal] = drw_cur_create(drw, XC_left_ptr);
 	cursor[CurResize] = drw_cur_create(drw, XC_sizing);
@@ -1875,6 +1879,7 @@ tag(const Arg *arg)
 		arrange(selmon);
 	}
 	updatecurrentdesktop();
+	updateclientlist();
 }
 
 void
@@ -1932,7 +1937,7 @@ togglebar(const Arg *arg)
 	// XMoveResizeWindow(dpy, selmon->barwin, selmon->wx, selmon->by, selmon->ww, bh);
 	arrange(selmon);
 }
- 
+
 void
 unmanagealtbar(Window w)
 {
@@ -1998,6 +2003,7 @@ toggletag(const Arg *arg)
 		arrange(selmon);
 	}
 	updatecurrentdesktop();
+	updateclientlist();
 }
 
 void
@@ -2140,13 +2146,24 @@ updateclientlist(void)
 {
 	Client *c;
 	Monitor *m;
+	unsigned int i;
+	long unsigned int deckindex = 0;
 
 	XDeleteProperty(dpy, root, netatom[NetClientList]);
 	for (m = mons; m; m = m->next)
-		for (c = m->clients; c; c = c->next)
+		for (c = m->clients; c; c = c->next) {
 			XChangeProperty(dpy, root, netatom[NetClientList],
 				XA_WINDOW, 32, PropModeAppend,
 				(unsigned char *) &(c->win), 1);
+			for (i = 0; i < LENGTH(tags); i++) {
+				if (c->tags & (1 << i)) {
+					deckindex = i;
+					break;
+				}
+			}
+			XChangeProperty(dpy, c->win, netatom[NetWMDesktop], XA_CARDINAL, 32,
+				PropModeReplace, (unsigned char *)&deckindex, 1);
+		}
 }
 void updatecurrentdesktop(void){
 	long rawdata[] = { selmon->tagset[selmon->seltags] };
